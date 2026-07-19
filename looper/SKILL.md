@@ -4,6 +4,25 @@ Use when: setting up Looper, running `looper takeover` on a PR, debugging looper
 
 Looper turns AI coding agents into an autonomous dev team across GitHub repos — plan, review, fix, and ship PRs on a loop.
 
+## Preflight Cheat Sheet
+
+Before any looper command, always run these checks:
+
+```bash
+# 1. Is looperd running and reachable?
+looper status
+# Returns daemon and config health. If it fails, Looper commands will error.
+
+# 2. Is the project registered?
+looper project list
+# If the repo isn't listed, register it first:
+looper project add /path/to/repo
+
+# 3. Daemon not running? Start or install it:
+looper daemon status || looper daemon start
+looper daemon status || looper daemon install  # first-time setup
+```
+
 ## Quick Install (macOS/Linux)
 
 ```bash
@@ -17,7 +36,7 @@ looper bootstrap          # interactive: writes config, installs daemon, starts 
 looper project add /path/to/your/repo   # register a repo
 ```
 
-Requirements: `git`, `gh` authenticated, one agent CLI on PATH (opencode, claude-code, codex, cursor-cli, or grok-build).
+Requirements: `git`, `gh` authenticated (`gh auth status`), one agent CLI on PATH (opencode, claude-code, codex, cursor-cli, or grok-build).
 
 ## Common Commands
 
@@ -34,7 +53,7 @@ looper takeover --agent-vendor opencode  # specify agent if ambiguous
 
 ```bash
 looper plan   --project <id> --issue <num>      # write a spec PR
-looper review <owner/repo>#<pr> [--loop]         # review and re-review
+looper review <owner/repo>#<pr> [--loop]        # review and re-review
 looper work   --project <id> --issue <num>       # implement from issue
 ```
 
@@ -53,16 +72,18 @@ looper daemon start|stop|restart     # daemon lifecycle
 ## Config
 
 Canonical path: `~/.looper/config.toml`
-Agent vendor is required to run loops (`agent.vendor` — e.g. "opencode").
+Agent vendor is required for loops (`agent.vendor` — e.g. "opencode").
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
+| `looper status` fails | Looperd not running: `looper daemon start` or `looper daemon install` |
 | `looper ps` shows stale loops | `looper run reconcile-stale` |
-| daemon won't start | Check `~/.looper/config.toml` syntax, run `looper status` |
-| PR not picked up | Verify `gh auth status`, labels (`looper:plan`), assignee |
+| daemon won't start | Check `~/.looper/config.toml` syntax, validate agent.vendor is set |
+| PR not picked up | Verify `gh auth status`, labels (`looper:plan`), assignee, and project registered |
 | agent not found | Set `--agent-vendor opencode` or configure in `~/.looper/config.toml` |
+| takeover command freezes | Confirm daemon is running: always run `looper status` as first step |
 
 ## References
 
